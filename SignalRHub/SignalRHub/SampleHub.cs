@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.SignalR;
@@ -39,8 +40,18 @@ namespace SignalRHub
             if (!userNames.ContainsKey(userName))
             {
                 userNames.Add(userName, Context.ConnectionId);
+
+                Clients.All.usersLoggedIn(userName);
             }
         }
+
+        public void RequestUserNames(string userName)
+        {
+            var users = userNames.Keys.ToArray();
+
+            Clients.Client(userNames[userName]).usersListSend(users);
+        }
+
 
         public override Task OnConnected()
         {
@@ -62,6 +73,7 @@ namespace SignalRHub
             }
 
             userNames.Remove(userName);
+            Clients.All.usersLoggedOut(userName);
 
             return base.OnDisconnected(stopCalled);
         }
