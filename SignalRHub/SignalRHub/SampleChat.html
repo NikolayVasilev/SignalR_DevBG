@@ -8,6 +8,20 @@
             border: thick solid #808080;
             padding: 20px;
             margin: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-board{
+            display: flex;
+        }
+
+        .left{
+            flex-basis: 60%;
+        }
+
+        .right {
+            flex-basis: 30%;
         }
     </style>
 
@@ -39,6 +53,21 @@
                     + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
             };
 
+            chat.client.usersListSend = function (users) {
+                $('#users').empty();
+
+                users.forEach(function (user) {
+                    var encodedName = $('<div />').text(user).html();
+                    $('#users').append('<li><strong>' + encodedName
+                        + '</strong></li>');
+                });
+
+            }
+
+            chat.client.usersLoggedIn = function (user) {
+                chat.server.requestUserNames($('#displayname').val());
+            }
+
             // Set initial focus to message input box.
             $('#message').focus();
 
@@ -68,6 +97,7 @@
             $.connection.hub.start().done(function () {
                 $('#sendmessage').click(sendMessageFunc);
                 chat.server.register($('#displayname').val());
+                chat.server.requestUserNames($('#displayname').val());
             });
 
 
@@ -76,10 +106,20 @@
 </head>
 <body>
     <div class="container">
-        <input type="text" id="message" />
-        <input type="button" id="sendmessage" value="Send" />
-        <input type="text" readonly id="displayname" />
-        <ul id="discussion"></ul>
+        <div>
+            <input type="text" id="message" />
+            <input type="button" id="sendmessage" value="Send" />
+            <input type="hidden" readonly id="displayname" />
+        </div>
+
+        <div class="message-board">
+            <div class="left">
+                <ul id="discussion"></ul>
+            </div>
+            <div class="right">
+                <ul id="users"></ul>
+            </div>
+        </div>
     </div>
 
     
