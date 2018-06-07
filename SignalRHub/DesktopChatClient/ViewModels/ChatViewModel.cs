@@ -113,13 +113,13 @@ namespace DesktopChatClient.ViewModels
 
         private void OnUserLoggedIn(string userName)
         {
-            if (!this.Users.Contains(userName))
+            App.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
-                App.Current.Dispatcher.BeginInvoke((Action)(() =>
+                if (!this.Users.Contains(userName))
                 {
                     this.Users.Add(userName);
-                }));
-            }
+                }
+            }));
         }
 
         internal void OnBroadCastMessage(string from, string message)
