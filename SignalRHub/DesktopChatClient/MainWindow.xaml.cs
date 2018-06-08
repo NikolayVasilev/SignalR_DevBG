@@ -64,7 +64,11 @@ namespace DesktopChatClient
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            this.ViewModel.CloseConnection();
+            if (this.ViewModel != null)
+            {
+                this.ViewModel.CloseConnection();
+            }
+
             base.OnClosing(e);
         }
     }

@@ -19,16 +19,22 @@ namespace DesktopChatClient.ViewModels
         {
             {
                 this.Connection = new HubConnection(url);
+
                 this.Proxy = Connection.CreateHubProxy("SampleHub");
 
-                try
-                {
-                    this.Connection.Start().Wait();
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                }
+                StartConnection();
+            }
+        }
+
+        private void StartConnection()
+        {
+            try
+            {
+                this.Connection.Start().Wait();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
             }
         }
 
@@ -36,7 +42,14 @@ namespace DesktopChatClient.ViewModels
         {
             if (this.Connection != null)
             {
-                this.Connection.Stop();
+                try
+                {
+                    this.Connection.Stop();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
             }
         }
     }

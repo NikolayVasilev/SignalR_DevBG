@@ -68,6 +68,10 @@
                 chat.server.requestUserNames($('#displayname').val());
             }
 
+            chat.client.usersLoggedOut = function (user) {
+                chat.server.requestUserNames($('#displayname').val());
+            }
+
             // Set initial focus to message input box.
             $('#message').focus();
 
@@ -99,8 +103,6 @@
                 chat.server.register($('#displayname').val());
                 chat.server.requestUserNames($('#displayname').val());
             });
-
-
         });
     </script>
 </head>
