@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Web;
 using Microsoft.AspNet.SignalR;
 
@@ -10,6 +11,26 @@ namespace SignalRHub
     public class SampleHub : Hub
     {
         private static Dictionary<string, string> userNames = new Dictionary<string, string>();
+        private static Timer adminNotificationTimer;
+
+        static SampleHub()
+        {
+            adminNotificationTimer = new Timer();
+            adminNotificationTimer.Interval = TimeSpan.FromSeconds(5).TotalMilliseconds;
+
+            adminNotificationTimer.Elapsed += AdminNotificationTimer_Elapsed;
+            adminNotificationTimer.Start();
+        }
+
+        private static void AdminNotificationTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (userNames.Keys.Contains("admin"))
+            {
+                var context = GlobalHost.ConnectionManager.GetHubContext<SampleHub>();
+
+                context.Clients.Client(userNames["admin"]).broadcastMessage("systemInfo", "ServiceUp");
+            }
+        }
 
         public void Send(string name, string message)
         {
@@ -22,10 +43,17 @@ namespace SignalRHub
                     var userName = splits[0].Substring(1);
                     var messageText = message.Substring(splits[0].Length + 1);
 
-                    Clients.Client(userNames[userName]).broadcastMessage(name, messageText);
-                    if (name != userName)
+                    if (userNames.Keys.Contains(userName))
                     {
-                        Clients.Client(userNames[name]).broadcastMessage(name, messageText);
+                        Clients.Client(userNames[userName]).broadcastMessage(name, messageText);
+                        if (name != userName)
+                        {
+                            Clients.Client(userNames[name]).broadcastMessage(name, messageText);
+                        }
+                    }
+                    else
+                    {
+                        Clients.Client(userNames[name]).broadcastMessage("systemInfo", "User not logged in: " + userName);
                     }
                 }
             }
@@ -41,8 +69,13 @@ namespace SignalRHub
             {
                 userNames.Add(userName, Context.ConnectionId);
 
-                Clients.All.usersLoggedIn(userName);
             }
+            else
+            {
+                userNames[userName] = Context.ConnectionId;
+            }
+
+            Clients.All.usersLoggedIn(userName);
         }
 
         public void RequestUserNames(string userName)
